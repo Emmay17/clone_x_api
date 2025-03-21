@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  adonisjs:
+    build: .
+    container_name: my-adonis-app
+    ports:
+      - "3333:3333"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=3333
+    env_file:
+      - .env.prod
+    depends_on:
+      - postgres
+    command: ["node", "ace", "serve", "--watch"]
+
+  postgres:
+    image: postgres:15
+    container_name: my-postgres-db
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_USER=adonis
+      - POSTGRES_PASSWORD=adonis
+      - POSTGRES_DB=adonis_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
