@@ -1,6 +1,6 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
-export default class extends BaseSchema {
+export default class Users extends BaseSchema {
   protected tableName = 'users'
 
   async up() {
@@ -10,32 +10,25 @@ export default class extends BaseSchema {
 
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary()
-      table.string('full_name').nullable()
-      table.string('username').nullable().unique()
+      table.string('first_name', 50).notNullable()
+      table.string('last_name', 50).notNullable()
       table.string('email', 254).notNullable().unique()
       table.string('password').notNullable()
-      table.timestamp('last_connexion').nullable()
 
       table
-        .enum('status', ['actif', 'desactive', 'dormant'], {
+        .enum('status', ['activated', 'pending', 'blocked', 'deactivated'], {
           useNative: true,
-          enumName: 'status_compte',
+          enumName: 'user_account_status',
         })
         .notNullable()
-        .defaultTo('desactive')
+        .defaultTo('pending')
 
-      table.string('profile_image').nullable()
-      table.string('bio').nullable()
-      table.string('location').nullable()
-      table.string('links').nullable()
-
-      // 🔒 Référence au champ labelle de la table permissions
       table
         .string('permission_labelle')
         .notNullable()
-        .references('labelle')
-        .inTable('permissions')
-        .onDelete('CASCADE') // ou SET NULL, selon ton besoin
+        .references('label')
+        .inTable('roles')
+        .onDelete('CASCADE')
 
       table.timestamp('created_at', { useTz: true }).notNullable().defaultTo(this.now())
       table.timestamp('updated_at', { useTz: true }).nullable()
@@ -44,11 +37,8 @@ export default class extends BaseSchema {
 
   async down() {
     this.schema.dropTable(this.tableName)
-
     this.defer(async (db) => {
       await db.raw('DROP TYPE IF EXISTS status_compte')
     })
   }
-
-
 }

@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeCreate, column, scope } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
+import { v4 as uuidv4 } from 'uuid'
 
 // Auth mixin configuration
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -17,11 +18,11 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare id: string
 
   // les information indispensable de l'utilisateur
-  @column({ columnName: 'full_name', serializeAs: 'fullName' })
-  declare fullName: string | null
+  @column({ columnName: 'first_name', serializeAs: 'firstName' })
+  declare firstName: string | null
 
-  @column()
-  declare username: string
+  @column({ columnName: 'last_name', serializeAs: 'lastName' })
+  declare lastName: string | null
 
   @column()
   declare email: string
@@ -29,28 +30,15 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ serializeAs: null })
   declare password: string
 
-  // Information non critique de l'utilisateur
-  @column({ columnName: 'profile_image', serializeAs: 'profileImage' })
-  declare profileImage: string | null
-
-  @column()
-  declare bio: string | null
-
-  @column()
-  declare location: string | null
-
-  @column()
-  declare links: string | null
-
-  // La permission de l'utilisateur 
+  // La permission de l'utilisateur
   @column({ columnName: 'permission_labelle', serializeAs: 'permissionLabelle' })
-  declare permissionLabelle: string
+  declare role: string
 
   // Son status pour savoir si son compte est actif ou pas ou dormant et nous aide a verifier l'email grace a un OTP
   @column()
-  declare status: 'actif' | 'desactive' | 'dormant'
+  declare status: 'activated' | 'deactivated' | 'blocked' | 'pending'
 
-  // La derniere connexion de l'utilisateur 
+  // La derniere connexion de l'utilisateur
   @column.dateTime({
     columnName: 'last_connexion',
     serializeAs: 'lastConnexion',
@@ -63,9 +51,41 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column.dateTime({ autoCreate: true, columnName: 'created_at', serializeAs: 'createdAt' })
   declare createdAt: DateTime
 
-  @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at', serializeAs: 'updatedAt' })
+  @column.dateTime({
+    autoCreate: true,
+    autoUpdate: true,
+    columnName: 'updated_at',
+    serializeAs: 'updatedAt',
+  })
   declare updatedAt: DateTime | null
 
+  @beforeCreate()
+  public static assignUuid(user: User) {
+    user.id = uuidv4()
+    user.role = 'Test'
+  }
   // Access tokens support
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+  static accessTokens = DbAccessTokensProvider.forModel(User, {
+    expiresIn: '30 days',
+    prefix: 'oat_',
+    table: 'auth_access_tokens',
+    type: 'auth_token',
+    tokenSecretLength: 40,
+  })
+
+  static activatedAccountUser = scope((query) => {
+    query.where('status', 'activated')
+  })
+
+  static deactivatedAccountUser = scope((query) => {
+    query.where('status', 'deactivated')
+  })
+
+  static blockedAccountUser = scope((query) => {
+    query.where('status', 'blocked')
+  })
+
+  static pendingAccountUser = scope((query) => {
+    query.where('status', 'pending')
+  })
 }

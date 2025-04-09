@@ -7,15 +7,16 @@ vine.messagesProvider = new SimpleMessagesProvider({
     required: 'Le champ {{ field }} est obligatoire',
   })
 
-export const addpermission  = vine.compile(
+export const addRole  = vine.compile(
     vine.object({
-    labelle: vine.string().minLength(3).maxLength(50),
+    label: vine.string().minLength(3).maxLength(50),
     description: vine.string().minLength(5).maxLength(255)
   })
 )
 
-export const updatepermission = vine.compile(
+export const updateRole = vine.compile(
   vine.object({
     description: vine.string().minLength(5).maxLength(255).optional()
   })
 )
+

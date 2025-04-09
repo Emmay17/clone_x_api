@@ -1,12 +1,12 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column, beforeSave } from '@adonisjs/lucid/orm'
 
-export default class Permission extends BaseModel {
+export default class Role extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare labelle: string
+  declare label: string
 
   @column()
   declare description: string
@@ -17,9 +17,9 @@ export default class Permission extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
   @beforeSave()
-  public static lowercaseFields(permission: Permission) {
-    if (permission.labelle) {
-      permission.labelle = permission.labelle.toLowerCase()
+  public static lowercaseFields(role: Role) {
+    if (role.label) {
+      role.label = role.label.toLowerCase()
     }
   }
 }
