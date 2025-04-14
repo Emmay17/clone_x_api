@@ -11,6 +11,7 @@ import AuthController from '#controllers/auth_controller'
 import PermissionsController from '#controllers/roles_controller'
 import UsersController from '#controllers/users_controller'
 import router from '@adonisjs/core/services/router'
+import { middleware } from './kernel.js'
 
 router.get('/', async () => {
   return "BInevenue sur mon API avec AdonisJS"
@@ -50,22 +51,23 @@ router
   // route pour authentifications
 router
   .group(() => {
+    // route d'enregistrement des utilisateurs
+    router
+      .post('/register', [AuthController, 'register'])
+      .as('user.register') // enregistrement d'un Utilisateur
     router
       .post('/login', [AuthController, 'login'])
       .as('auth.login') // authentification d'un Utilisateur
     router
       .post('/logout', [AuthController, 'logout'])
       .as('auth.logout') // deconnexion d'un Utilisateur
+      .use(middleware.auth())
   })
   .prefix('/auth')
 
   // route pour les utilisateurs
 router
   .group(() => {
-    // route d'enregistrement des utilisateurs
-    router
-      .post('/register', [UsersController, 'register'])
-      .as('user.register') // enregistrement d'un Utilisateur
 
     // routes pour les differentes recherche des Utilisateurs
     router

@@ -4,9 +4,9 @@ export default class Users extends BaseSchema {
   protected tableName = 'users'
 
   async up() {
-    this.defer(async (db) => {
-      await db.rawQuery('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
-    })
+    // this.defer(async (db) => {
+    //   await db.rawQuery('CREATE EXTENSION IF NOT EXISTS "uuid-ossp";')
+    // })
 
     this.schema.createTable(this.tableName, (table) => {
       table.uuid('id').primary()
@@ -24,7 +24,7 @@ export default class Users extends BaseSchema {
         .defaultTo('pending')
 
       table
-        .string('permission_labelle')
+        .string('role')
         .notNullable()
         .references('label')
         .inTable('roles')

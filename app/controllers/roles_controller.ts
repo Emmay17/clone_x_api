@@ -12,9 +12,7 @@ export default class RolesController {
       const validate = await addRole.validate(data)
 
       // 2 . verifier si le labelle existe deja dans la BDD pour eviter les doublons
-      const labelleExist = await Role.query()
-        .whereRaw('label = LOWER(?)', [data.labelle])
-        .first()
+      const labelleExist = await Role.query().whereRaw('label = LOWER(?)', [data.labelle]).first()
 
       if (labelleExist) {
         return ctx.response.badRequest({ message: 'Ce labelle existe déjà' })
@@ -64,17 +62,17 @@ export default class RolesController {
 
   async fetchOne(ctx: HttpContext) {
     try {
-        // 1 . recuperer le paramettre de ma route
+      // 1 . recuperer le paramettre de ma route
       const id = ctx.params.id
 
-        // 2 . trouver la Role avec l'id demander
+      // 2 . trouver la Role avec l'id demander
       const role = await Role.findOrFail(id)
       if (!role) {
         return ctx.response.notFound({
           message: `Aucun role trouvée avec l'Id : ${id}`,
         })
       }
-        // 3 . retourner la Role trouvée
+      // 3 . retourner la Role trouvée
       return ctx.response.json({
         message: 'Role trouvée avec succés',
         data: role,
@@ -155,16 +153,16 @@ export default class RolesController {
 
   async delete(ctx: HttpContext) {
     try {
-        // 1 . recuperer le paramettre de ma route
+      // 1 . recuperer le paramettre de ma route
       const id = ctx.params.id
 
-        // 2 . trouver la Role avec l'id demander
-        const roles = await Role.findOrFail(id)
+      // 2 . trouver la Role avec l'id demander
+      const roles = await Role.findOrFail(id)
 
-        // 3 . supprimer la Role
+      // 3 . supprimer la Role
       await roles.delete()
 
-        // 4 . retourner la Role supprimée
+      // 4 . retourner la Role supprimée
       return ctx.response.json({
         message: `Role ${roles.label} supprimée avec succès`,
         data: roles,

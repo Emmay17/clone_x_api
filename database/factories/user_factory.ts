@@ -8,9 +8,8 @@ export const UserFactory = factory
     return {
       firstName: firstName,
       lastName: lastName,
-      username: `@${firstName}_${lastName}`,
       email: faker.internet.email(),
-      password: 'test12345',
+      password: 'password1234',
     }
   })
   .build()

@@ -1,8 +1,41 @@
-import { loginUserValidator } from '#validators/auth'
+import { loginUserValidator, registerUserValidator } from '#validators/auth'
 import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class AuthController {
+  async register(ctx: HttpContext) {
+    // 0 . recuperer les donnees de la requete
+    const data = ctx.request.all()
+
+    try {
+      // 1 . valider les donnees avec note validator fait avec vine
+      const validate = await registerUserValidator.validate(data)
+
+      // 3. enregistrer dans la BDD
+      const user = await User.create(validate)
+
+      // 4. generer un token valide
+      const token = await ctx.auth.use('api').createToken(user)
+      // 5. retourner une reponse au client
+      return ctx.response.status(201).json({
+        message: 'Utilisateur enregistré avec succès',
+        token: token.toJSON(),
+        type: token.type,
+        user: user.toJSON(),
+      })
+    } catch (error) {
+      console.error('Erreur register:', error)
+
+      if (error.code === 'E_VALIDATION_ERROR') {
+        return ctx.response.badRequest({ message: 'Erreur de validation', errors: error.messages })
+      }
+
+      return ctx.response.internalServerError({
+        message: 'Une erreur est survenue lors de l’inscription',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      })
+    }
+  }
   async login({ request, auth, response }: HttpContext) {
     // const { email, password } = request.only([`email`, `password`])
 

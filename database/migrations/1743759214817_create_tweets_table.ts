@@ -13,7 +13,7 @@ export default class extends BaseSchema {
         .inTable('users')
         .onDelete('CASCADE')
 
-      table.string('content').nullable()
+      table.text('content').nullable()
       table.string('media').nullable()
 
       table.integer('parent_tweet')

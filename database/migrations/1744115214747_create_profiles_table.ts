@@ -5,7 +5,8 @@ export default class Profiles extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.uuid('id').primary().references('id').inTable('users').onDelete('CASCADE')
+      table.increments('id')
+      table.uuid('user_id').primary().references('id').inTable('users').onDelete('CASCADE')
       table.string('username', 15).notNullable().unique() // important pour les @handle
       table.string('profile_image').nullable().comment('URL to avatar or profile photo')
       table.string('banner_image').nullable().comment('Banner photo like Twitter')
