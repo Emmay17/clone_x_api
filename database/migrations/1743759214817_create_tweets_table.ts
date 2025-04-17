@@ -12,9 +12,9 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
+        .notNullable
 
       table.text('content').nullable()
-      table.string('media').nullable()
 
       table.integer('parent_tweet')
       .unsigned()
