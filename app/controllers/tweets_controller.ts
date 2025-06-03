@@ -2,7 +2,6 @@ import Media from '#models/media'
 import Tweet from '#models/tweet'
 import type { HttpContext } from '@adonisjs/core/http'
 import CloudinaryService from '../Services/CloudinaryService.js' // ✔️ Bien importer avec alias
-import { request } from 'http'
 // import Database from '@ioc:Adonis/Lucid/Database'
 
 export default class TweetsController {
@@ -98,6 +97,44 @@ export default class TweetsController {
       return ctx.response.ok({
         message: 'Tweets récupérés avec succès',
         data: reponse,
+      })
+    } catch (error) {
+      console.error('Erreur lors de la récupération des tweets:', error)
+      return ctx.response.internalServerError({
+        message: 'Erreur serveur lors de la récupération des tweets.',
+        errors: error.message || 'Erreur inconnue',
+      })
+    }
+  }
+
+  async fetchAllTweet(ctx: HttpContext) {
+    try {
+      const tweets = await Tweet.query()
+        .orderBy('created_at', 'desc')
+        .preload('medias', (query) => {
+          query.select(['tweet_id', 'url', 'type'])
+        })
+        .preload('user', (userQuery) => {
+          userQuery.select(['id', 'email'])
+          userQuery.preload('profile', (profileQuery) => {
+            profileQuery.select([
+              'user_id',
+              'first_name',
+              'last_name',
+              'username',
+              'profile_image',
+              'is_verified',
+            ])
+          })
+        })
+        .withCount('likes', (query) => {
+          query.as('likes_count')
+        })
+        .paginate(ctx.request.input('page', 1), ctx.request.input('perPage', 10))
+
+      return ctx.response.ok({
+        message: 'Tweets récupérés avec succès',
+        data: tweets.toJSON(),
       })
     } catch (error) {
       console.error('Erreur lors de la récupération des tweets:', error)

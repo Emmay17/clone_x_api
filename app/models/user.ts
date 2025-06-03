@@ -1,15 +1,12 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { afterCreate, BaseModel, beforeCreate, column, hasOne, scope } from '@adonisjs/lucid/orm'
+import { BaseModel, beforeCreate, column, hasOne, scope } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { v4 as uuidv4 } from 'uuid'
 import Profile from './profile.js'
 import type { HasOne } from '@adonisjs/lucid/types/relations'
-import { faker } from '@faker-js/faker'
-// import { HasOne } from 'node_modules/@adonisjs/lucid/build/src/orm/relations/has_one/index.js'
-// import { HasOne } from 'node_modules/@adonisjs/lucid/build/src/orm/relations/has_one/index.js'
 
 // Auth mixin configuration
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -58,24 +55,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
     user.role = 'test_user'
     user.status = 'activated'
   }
-
-  // @afterCreate()
-  // public static async createProfile(user: User) {
-  //   const firstname = faker.person.firstName()
-  //   await user.related('profile').create({
-  //     userId: user.id,
-  //     firstName: firstname,
-  //     lastName: faker.person.lastName(),
-  //     username: `${firstname}${faker.number.int(100)}`,
-  //     profileImage: faker.image.avatar(),
-  //     bannerImage: faker.image.urlPicsumPhotos({ width: 1000, height: 300 }),
-  //     bio: '',
-  //     location: faker.location.city(),
-  //     website: faker.internet.url(),
-  //     isVerified: false,
-  //     birthDate: DateTime.fromJSDate(faker.date.past()),
-  //   })
-  // }
 
   // Access tokens support
   static accessTokens = DbAccessTokensProvider.forModel(User, {

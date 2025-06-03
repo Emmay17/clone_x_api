@@ -38,7 +38,6 @@ const registerProfileValidatorSchema = vine.object({
   birthdayDate: vine.date(),
 })
 
-
 const updateUserValidatorSchema = vine.object({
   email: vine.string().minLength(5).maxLength(225).email(),
   password: vine.string().minLength(4).maxLength(255),

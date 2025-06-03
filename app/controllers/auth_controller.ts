@@ -7,9 +7,7 @@ import {
 } from '#validators/auth'
 import User from '#models/user'
 import type { HttpContext } from '@adonisjs/core/http'
-// import { Database } from '@adonisjs/lucid/database'
 import db from '@adonisjs/lucid/services/db'
-import { Database } from '@adonisjs/lucid/database'
 import Profile from '#models/profile'
 
 export default class AuthController {
@@ -49,7 +47,7 @@ export default class AuthController {
 
       // 3. generer un token valide
       await trx.commit()
-      
+
       const token = await ctx.auth.use('api').createToken(userRegistered)
 
       // 4. valider la transaction
