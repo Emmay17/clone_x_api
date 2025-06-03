@@ -7,6 +7,9 @@ import { DbAccessTokensProvider } from '@adonisjs/auth/access_tokens'
 import { v4 as uuidv4 } from 'uuid'
 import Profile from './profile.js'
 import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { faker } from '@faker-js/faker'
+// import { HasOne } from 'node_modules/@adonisjs/lucid/build/src/orm/relations/has_one/index.js'
+// import { HasOne } from 'node_modules/@adonisjs/lucid/build/src/orm/relations/has_one/index.js'
 
 // Auth mixin configuration
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
@@ -20,12 +23,6 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare id: string
 
   // les information indispensable de l'utilisateur
-  @column({ columnName: 'first_name', serializeAs: 'firstName' })
-  declare firstName: string | null
-
-  @column({ columnName: 'last_name', serializeAs: 'lastName' })
-  declare lastName: string | null
-
   @column()
   declare email: string
 
@@ -53,7 +50,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare updatedAt: DateTime | null
 
   @hasOne(() => Profile)
-  public profile !: HasOne<typeof Profile>
+  declare profile: HasOne<typeof Profile>
 
   @beforeCreate()
   public static assignUuid(user: User) {
@@ -62,15 +59,23 @@ export default class User extends compose(BaseModel, AuthFinder) {
     user.status = 'activated'
   }
 
-  @afterCreate()
-  public static async createProfile(user: User) {
-    const username = `@${user.firstName?.slice(0, 3)}.${user.lastName?.slice(0, 3)}.2025`
-    await user.related('profile').create({
-      userId: user.id, // si `user_id` est la clé étrangère dans `profiles`
-      username,
-      bio: '', // exemple de champ
-    })
-  }
+  // @afterCreate()
+  // public static async createProfile(user: User) {
+  //   const firstname = faker.person.firstName()
+  //   await user.related('profile').create({
+  //     userId: user.id,
+  //     firstName: firstname,
+  //     lastName: faker.person.lastName(),
+  //     username: `${firstname}${faker.number.int(100)}`,
+  //     profileImage: faker.image.avatar(),
+  //     bannerImage: faker.image.urlPicsumPhotos({ width: 1000, height: 300 }),
+  //     bio: '',
+  //     location: faker.location.city(),
+  //     website: faker.internet.url(),
+  //     isVerified: false,
+  //     birthDate: DateTime.fromJSDate(faker.date.past()),
+  //   })
+  // }
 
   // Access tokens support
   static accessTokens = DbAccessTokensProvider.forModel(User, {

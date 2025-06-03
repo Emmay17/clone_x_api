@@ -1,13 +1,21 @@
 import { DateTime } from 'luxon'
-import type { BelongsTo, HasOne } from '@adonisjs/lucid/types/relations'
-import { BaseModel, belongsTo, column, hasOne } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
 import User from './user.js'
+import Tweet from './tweet.js'
 export default class Profile extends BaseModel {
+  // [x: string]: any
   @column()
   declare id: string
 
   @column({ columnName: 'user_id' }) // optionnel si le nom est déjà user_id dans ta DB
   declare userId: string
+
+  @column({columnName: 'first_name'})
+  declare firstName : string 
+
+  @column({columnName: 'last_name'})
+  declare lastName : string 
 
   @column()
   declare username: string
@@ -39,6 +47,10 @@ export default class Profile extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
 
+  @hasMany(() => Tweet, { foreignKey: 'user_id' })
+  declare tweets: HasMany<typeof Tweet>
+
   @belongsTo(() => User)
   public user!: BelongsTo<typeof User>
 }
+

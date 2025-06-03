@@ -25,7 +25,6 @@ export const http = defineConfig({
    */
   useAsyncLocalStorage: false,
 
-
   /**
    * Manage cookies configuration. The settings for the session id cookie are
    * defined inside the "config/session.ts" file.

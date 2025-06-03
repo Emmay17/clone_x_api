@@ -32,7 +32,7 @@ export default class UsersController {
   async fetchById(ctx: HttpContext) {
     const id = ctx.request.param('id')
     try {
-      const user = await User.findOrFail(id)
+      const user = await (await User.findOrFail(id))
       if (!user) {
         return ctx.response.notFound({ message: `Aucun utilisateur trouvé avec l'id ${id}` })
       }

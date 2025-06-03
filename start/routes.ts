@@ -13,6 +13,7 @@ import UsersController from '#controllers/users_controller'
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 import TweetsController from '#controllers/tweets_controller'
+import ProfilesController from '#controllers/profiles_controller'
 
 router.get('/', async () => {
   return 'BInevenue sur mon API avec AdonisJS'
@@ -66,6 +67,9 @@ router
       .get('/fetch-fullname/:fullName', [UsersController, 'fetchByFullname'])
       .as('user.fetchByFullname') // rechercher un utilisateur par son Fullname
 
+    // recuperation du profile de l'utilisateur
+    router.get('/profile/:id', [ProfilesController, 'fetchProfile']).as('user.profile') // recuperer le profile de l'utilisateur
+
     // route pour la mise a jour des utilisateurs
     router.put('/update/:id', [UsersController, 'update']).as('user.update') // mettre a jour un Utilisateur
 
@@ -77,9 +81,11 @@ router
 router
   .group(() => {
     // route pour eneregister un tweet avec media ou meme sans media tout court
-    router
-      .post('/post-tweet', [TweetsController, 'postTweet'])
-      .as('tweet.postTweet')
-      // .use(middleware.auth())
+    router.post('/post-tweet', [TweetsController, 'postTweet']).as('tweet.postTweet')
+    // .use(middleware.auth())
+
+    router.get('/fetch-tweets/:id', [TweetsController, 'fetchTweetsByUserId']).as('tweet.fetchTweets') // recuperer tous les tweets
   })
   .prefix('tweet')
+
+router.post('auth/verify-email', [AuthController, 'emailExist']).as('auth.verifyEmail') // verifier l'email d'un Utilisateur
