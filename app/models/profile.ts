@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
-import type { BelongsTo, HasMany, HasOne } from '@adonisjs/lucid/types/relations'
-import { BaseModel, belongsTo, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
 import User from './user.js'
 import Tweet from './tweet.js'
 export default class Profile extends BaseModel {
