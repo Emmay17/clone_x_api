@@ -112,7 +112,6 @@ export default class AuthController {
       })
     }
   }
-
   async logout({ auth, response }: HttpContext) {
     try {
       const user = auth.user!
@@ -158,7 +157,6 @@ export default class AuthController {
       })
     }
   }
-
   async emailExist(ctx: HttpContext) {
     try {
       const validateEmail = await emailValidator.validate(ctx.request.only(['email']))

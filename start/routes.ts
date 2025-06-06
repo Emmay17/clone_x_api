@@ -14,6 +14,7 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 import TweetsController from '#controllers/tweets_controller'
 import ProfilesController from '#controllers/profiles_controller'
+import LikesController from '#controllers/likes_controller'
 
 router.get('/', async () => {
   return 'BInevenue sur mon API avec AdonisJS'
@@ -83,9 +84,25 @@ router
     // route pour eneregister un tweet avec media ou meme sans media tout court
     router.post('/post-tweet', [TweetsController, 'postTweet']).as('tweet.postTweet')
     // .use(middleware.auth())
-
-    router.get('/fetch-tweets/:id', [TweetsController, 'fetchTweetsByUserId']).as('tweet.fetchTweets') // recuperer tous les tweets
+    router
+      .get('/fetch-tweets/:id', [TweetsController, 'fetchTweetsByUserId'])
+      .as('tweet.fetchTweets') // recuperer tous les tweets
   })
   .prefix('tweet')
+
+router.group(() => {
+  // route pour liker un tweet
+  router
+    .post('/likeUnlike-tweet/:tweetId/user/:userId', [LikesController, 'likeUnlikeTweet'])
+    .as('tweet.likeTweet') // liker un tweet
+
+  router
+  .post('/fetch-likes/:tweetId', [LikesController, 'fetchLikesByTweetId'])
+  .as('tweet.fetchLikesByTweetId') // recuperer les likes d'un tweet
+
+  router.post('/fetch-likes/user/:userId', [LikesController, 'fetchLikesByUserId'])
+  .as('tweet.fetchLikesByUserId') // recuperer les likes d'un utilisateur
+})
+.prefix('likes')
 
 router.post('auth/verify-email', [AuthController, 'emailExist']).as('auth.verifyEmail') // verifier l'email d'un Utilisateur
