@@ -3,16 +3,15 @@ import type { HttpContext } from '@adonisjs/core/http'
 
 export default class ProfilesController {
   async fetchProfile(ctx: HttpContext) {
+    const id = ctx.request.param('id')
+
+    if (!id) {
+      return ctx.response.badRequest({
+        message: 'ID de profil manquant',
+      })
+    }
     try {
-      const id = ctx.request.param('id')
-
-      if (!id) {
-        return ctx.response.badRequest({
-          message: 'ID de profil manquant',
-        })
-      }
-
-      const profile = await Profile.query().where('user_id = ?', id).first()
+      const profile = await Profile.query().where('user_id = ?', id).withCount('tweets').first()
 
       if (!profile) {
         return ctx.response.notFound({
