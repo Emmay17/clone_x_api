@@ -7,11 +7,11 @@ import CloudinaryService from '../Services/CloudinaryService.js' // ✔️ Bien 
 export default class TweetsController {
   async postTweet(ctx: HttpContext) {
     // const trx = await Database.transaction()
-    console.log('Début de la création du tweet')
+    const data = ctx.request.all()
     try {
-      const userId = ctx.request.input('user_id')
-      const content = ctx.request.input('content')
-      console.log(`userId: ${userId}, content: ${content}`)
+      const userId = data.user_id
+      const content = data.content || null
+      const tweet_id = data.tweet_id || null
 
       if (!userId || (!content && !ctx.request.file('media'))) {
         return ctx.response.badRequest({
@@ -19,11 +19,21 @@ export default class TweetsController {
         })
       }
 
+      // Si c'est un commentaire, on vérifie que le tweet parent existe
+    if (tweet_id) {
+      const parentTweet = await Tweet.find(tweet_id)
+      if (!parentTweet) {
+        return ctx.response.notFound({
+          message: 'Le tweet parent spécifié est introuvable.',
+        })
+      }
+    }
+
       // Étape 1 : Création du tweet
       const tweet = await Tweet.create({
         userId: userId,
-        content: content || null,
-        parent_tweet: ctx.request.input('parent_tweet') || null,
+        content: content,
+        parent_tweet: tweet_id,
       })
 
       // Étape 2 : Récupération des fichiers médias
@@ -46,14 +56,16 @@ export default class TweetsController {
         })
       }
 
-      return ctx.response.created({
-        message: 'Tweet créé avec succès',
-        data: tweet,
-      })
-    } catch (error) {
-      console.error('Erreur de validation:', JSON.stringify(error, null, 2))
-      const errors = error.formatted || error.messages || error
+      const message = tweet_id
+        ? 'Réponse ajoutée avec succès'
+        : 'Tweet créé avec succès'
 
+        return ctx.response.created({
+          message,
+          data: tweet,
+        })
+    } catch (error) {
+      const errors = error.formatted || error.messages || error
       return ctx.response.internalServerError({
         message: error.message || "Erreur lors de l'enregistrement du tweet",
         errors,
@@ -111,6 +123,7 @@ export default class TweetsController {
     try {
       const tweets = await Tweet.query()
         .orderBy('created_at', 'desc')
+        .whereNull('parent_tweet') // Récupérer uniquement les tweets principaux
         .preload('medias', (query) => {
           query.select(['tweet_id', 'url', 'type'])
         })
@@ -127,14 +140,14 @@ export default class TweetsController {
             ])
           })
         })
-        .withCount('likes', (query) => {
-          query.as('likes_count')
-        })
+        .withCount('likes')
+        .withCount('replies')
+        // .preload('replies')
         .paginate(ctx.request.input('page', 1), ctx.request.input('perPage', 10))
 
       return ctx.response.ok({
         message: 'Tweets récupérés avec succès',
-        data: tweets.toJSON(),
+        tweets: tweets.serialize(),
       })
     } catch (error) {
       console.error('Erreur lors de la récupération des tweets:', error)
@@ -144,4 +157,7 @@ export default class TweetsController {
       })
     }
   }
+
+  // async retweet(ctx: HttpContext) {
+  // }
 }

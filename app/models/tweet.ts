@@ -1,6 +1,6 @@
 import User from './user.js'
 import { DateTime } from 'luxon'
-import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import { BaseModel, belongsTo, column, computed, hasMany } from '@adonisjs/lucid/orm'
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import Media from './media.js'
 import Like from './like.js'
@@ -33,4 +33,26 @@ export default class Tweet extends BaseModel {
 
   @belongsTo(() => User)
   public user!: BelongsTo<typeof User>
+
+  @belongsTo(() => Tweet, {
+    foreignKey: 'parent_tweet',
+    localKey: 'id',
+  })
+  public parentTweet!: BelongsTo<typeof Tweet>
+
+  @hasMany(() => Tweet, {
+    foreignKey: 'parent_tweet',
+    localKey: 'id',
+  })
+  public replies!: HasMany<typeof Tweet>
+
+  @computed()
+  public get likes_count() {
+    return this.$extras.likes_count ?? 0
+  }
+
+  @computed()
+  public get replies_count() {
+    return this.$extras.replies_count ?? 0
+  }
 }

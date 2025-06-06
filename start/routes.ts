@@ -87,6 +87,10 @@ router
     router
       .get('/fetch-tweets/:id', [TweetsController, 'fetchTweetsByUserId'])
       .as('tweet.fetchTweets') // recuperer tous les tweets
+
+    router 
+    .get('/fetch-all-tweets', [TweetsController, 'fetchAllTweet'])
+    .as('tweet.fetchAllTweets') // recuperer tous les tweets
   })
   .prefix('tweet')
 
