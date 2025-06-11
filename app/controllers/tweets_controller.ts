@@ -20,14 +20,14 @@ export default class TweetsController {
       }
 
       // Si c'est un commentaire, on vérifie que le tweet parent existe
-    if (tweet_id) {
-      const parentTweet = await Tweet.find(tweet_id)
-      if (!parentTweet) {
-        return ctx.response.notFound({
-          message: 'Le tweet parent spécifié est introuvable.',
-        })
+      if (tweet_id) {
+        const parentTweet = await Tweet.find(tweet_id)
+        if (!parentTweet) {
+          return ctx.response.notFound({
+            message: 'Le tweet parent spécifié est introuvable.',
+          })
+        }
       }
-    }
 
       // Étape 1 : Création du tweet
       const tweet = await Tweet.create({
@@ -56,14 +56,17 @@ export default class TweetsController {
         })
       }
 
-      const message = tweet_id
-        ? 'Réponse ajoutée avec succès'
-        : 'Tweet créé avec succès'
+      await tweet.load('medias')
+      await tweet.load('user', (userQuery) => {
+        userQuery.preload('profile')
+      })
 
-        return ctx.response.created({
-          message,
-          data: tweet,
-        })
+      const message = tweet_id ? 'Réponse ajoutée avec succès' : 'Tweet créé avec succès'
+
+      return ctx.response.created({
+        message,
+        data: tweet,
+      })
     } catch (error) {
       const errors = error.formatted || error.messages || error
       return ctx.response.internalServerError({
@@ -82,6 +85,7 @@ export default class TweetsController {
       })
     }
     try {
+      await ctx.auth.authenticate()
       const tweets = await Tweet.query()
         .where('user_id', userId)
         .orderBy('created_at', 'desc')
@@ -104,6 +108,10 @@ export default class TweetsController {
         .withCount('likes', (query) => {
           query.as('likes_count')
         })
+        .preload('likes', (likesQuery) => {
+          likesQuery.where('user_id', ctx.auth.user?.id || 0)
+          // likesQuery.as('is_liked')
+        })
 
       const reponse = tweets.map((tweet) => tweet.toJSON())
       return ctx.response.ok({
@@ -120,7 +128,24 @@ export default class TweetsController {
   }
 
   async fetchAllTweet(ctx: HttpContext) {
+    const page = Number(ctx.request.param('page', 1))
+    const perPage = Number(ctx.request.param('perPage', 10))
+
+    // Valider que page et perPage sont bien des entiers positifs
+    if (isNaN(page) || page < 1 || isNaN(perPage) || perPage < 1) {
+      return ctx.response.badRequest({
+        message: 'Les paramètres de pagination sont invalides.',
+      })
+    }
+    await ctx.auth.authenticate()
+    // const user = await ctx.auth.getUserOrFail()
+    // if (!user) {
+    //   return ctx.response.notFound({
+    //     message: 'Utilisateur non trouvé',
+    //   })
+    // }
     try {
+      console.log("mon id de l'utilisateur connecté:", ctx.auth.user?.id)
       const tweets = await Tweet.query()
         .orderBy('created_at', 'desc')
         .whereNull('parent_tweet') // Récupérer uniquement les tweets principaux
@@ -142,8 +167,11 @@ export default class TweetsController {
         })
         .withCount('likes')
         .withCount('replies')
-        // .preload('replies')
-        .paginate(ctx.request.input('page', 1), ctx.request.input('perPage', 10))
+        .preload('likes', (likesQuery) => {
+          likesQuery.where('user_id', ctx.auth.user?.id || 0)
+          // likesQuery.as('is_liked')
+        })
+        .paginate(page, perPage)
 
       return ctx.response.ok({
         message: 'Tweets récupérés avec succès',
@@ -158,6 +186,4 @@ export default class TweetsController {
     }
   }
 
-  // async retweet(ctx: HttpContext) {
-  // }
 }

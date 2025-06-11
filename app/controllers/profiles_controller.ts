@@ -11,7 +11,7 @@ export default class ProfilesController {
       })
     }
     try {
-      const profile = await Profile.query().where('user_id = ?', id).withCount('tweets').first()
+      const profile = await Profile.query().where('user_id', id).first()
 
       if (!profile) {
         return ctx.response.notFound({

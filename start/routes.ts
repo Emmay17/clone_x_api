@@ -88,25 +88,27 @@ router
       .get('/fetch-tweets/:id', [TweetsController, 'fetchTweetsByUserId'])
       .as('tweet.fetchTweets') // recuperer tous les tweets
 
-    router 
-    .get('/fetch-all-tweets', [TweetsController, 'fetchAllTweet'])
-    .as('tweet.fetchAllTweets') // recuperer tous les tweets
+    router
+      .get('/fetch-all-tweets/:page/:perPage', [TweetsController, 'fetchAllTweet'])
+      .as('tweet.fetchAllTweets') // recuperer tous les tweets
   })
-  .prefix('tweet')
+  .prefix('tweet').use(middleware.auth()) 
 
-router.group(() => {
-  // route pour liker un tweet
-  router
-    .post('/likeUnlike-tweet/:tweetId/user/:userId', [LikesController, 'likeUnlikeTweet'])
-    .as('tweet.likeTweet') // liker un tweet
+router
+  .group(() => {
+    // route pour liker un tweet
+    router
+      .post('/likeUnlike-tweet/:tweetId/user/:userId', [LikesController, 'likeUnlikeTweet'])
+      .as('tweet.likeTweet') // liker un tweet
 
-  router
-  .post('/fetch-likes/:tweetId', [LikesController, 'fetchLikesByTweetId'])
-  .as('tweet.fetchLikesByTweetId') // recuperer les likes d'un tweet
+    router
+      .post('/fetch-likes/:tweetId', [LikesController, 'fetchLikesByTweetId'])
+      .as('tweet.fetchLikesByTweetId') // recuperer les likes d'un tweet
 
-  router.post('/fetch-likes/user/:userId', [LikesController, 'fetchLikesByUserId'])
-  .as('tweet.fetchLikesByUserId') // recuperer les likes d'un utilisateur
-})
-.prefix('likes')
+    router
+      .post('/fetch-likes/user/:userId', [LikesController, 'fetchLikesByUserId'])
+      .as('tweet.fetchLikesByUserId') // recuperer les likes d'un utilisateur
+  })
+  .prefix('likes').use(middleware.auth()) // Authentification requise pour les routes de likes
 
 router.post('auth/verify-email', [AuthController, 'emailExist']).as('auth.verifyEmail') // verifier l'email d'un Utilisateur

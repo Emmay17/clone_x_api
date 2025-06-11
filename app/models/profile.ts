@@ -47,7 +47,7 @@ export default class Profile extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, columnName: 'updated_at' })
   declare updatedAt: DateTime
 
-  @hasMany(() => Tweet, { foreignKey: 'user_id' })
+  @hasMany(() => Tweet, { foreignKey: 'userId' })
   declare tweets: HasMany<typeof Tweet>
 
   @belongsTo(() => User)

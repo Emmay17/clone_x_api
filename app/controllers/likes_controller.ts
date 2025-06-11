@@ -10,15 +10,15 @@ export default class LikesController {
       return ctx.response.status(404).json({ message: 'Utilisateur ou tweet non spécifié' })
     }
     try {
-      const userExiste = await User.findOrFail(userId)
+      await ctx.auth.authenticate()
+      const userExiste = await User.findOrFail(ctx.auth.user?.id || 0)
       const tweetExist = await Tweet.findOrFail(tweetId)
-
       if (userExiste && tweetExist) {
         // Vérifier si l'utilisateur a déjà liké le tweet
         const alreadyLiked = await tweetExist
           .related('likes')
           .query()
-          .where('user_id', userId)
+          .where('user_id', ctx.auth.user?.id || 0)
           .first()
 
         if (alreadyLiked) {
@@ -29,7 +29,7 @@ export default class LikesController {
         }
 
         // Ajouter le like
-        await tweetExist.related('likes').create({ userId })
+        await tweetExist.related('likes').create({userId: ctx.auth.user?.id})
 
         return ctx.response.status(201).json({
           message: 'Like ajouté avec succès',

@@ -55,4 +55,9 @@ export default class Tweet extends BaseModel {
   public get replies_count() {
     return this.$extras.replies_count ?? 0
   }
+
+  @computed()
+  public get hasLiked(){
+    return (this.likes ?? []).length > 0
+  }
 }
